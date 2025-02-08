@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
   const user = verifyToken(token); //store decoded user details
 
   if (!user) {
-    return NextResponse.next();
+    return NextResponse.json({ error: "Invalid Token" }, { status: 401 });
   }
 
   console.log("Auth done", user);
