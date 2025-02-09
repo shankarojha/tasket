@@ -6,6 +6,8 @@ import { GlobalResponse } from "@/types/globalResponse";
 import { z } from "zod";
 import { generateToken } from "@/lib/token";
 import { TUser } from "@/types/mongodbtypes";
+import { cookies } from "next/headers";
+
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -52,11 +54,12 @@ export async function POST(req: Request) {
     }
     const { password: _, __v, ...userWoPassword } = user; // removing password from response
     const token = generateToken(userWoPassword);
+    cookies().set("auth_token", token, { httpOnly: true, secure: true });
     const response: GlobalResponse = {
       success: true,
       message: "User Loggedin successfully",
       error: null,
-      data: { userWoPassword, token },
+      data: { user:userWoPassword, token },
     };
     return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
