@@ -9,8 +9,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: {
+          DEFAULT: "rgb(17, 24, 39)",
+          gradient: "rgb(241,246,246)",
+        },
+        primary: {
+          DEFAULT: "#6366F1",
+          hover: "#4F46E5",
+        },
+        input: {
+          DEFAULT: "#1F2937",
+          focus: "#818CF8",
+        },
+        text: {
+          DEFAULT: "#1F2937",
+          secondary: "#FFFFFF",
+        },
+        card: {
+          DEFAULT: "rgba(255, 255, 255, 0.1)",
+          border: "rgba(255, 255, 255, 0.2)",
+        },
+        backdropBlur: {
+          glass: "10px",
+        },
       },
     },
   },

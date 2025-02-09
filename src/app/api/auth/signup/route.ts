@@ -9,7 +9,7 @@ const signupSchema = z.object({
   email:z.string().email(), 
   name: z.string(), 
   password:z.string(), 
-  role:z.enum(["manager", "user"])
+  role:z.enum(["manager", "performer"])
 })
 
 export async function POST(req: Request) {
