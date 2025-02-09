@@ -1,32 +1,46 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "./lib/token"; // jwt verify function import
+import { verifyToken } from "./lib/token";
+
+const PROTECTED_ROUTES = ["/dashboard", "/tasks"]; // frontend routes to authorize
 
 export function middleware(req: NextRequest) {
-  const authHeader = req.headers.get("authorization"); // authorization token from the header should start with "Bearer"
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ")
+    ? authHeader.split(" ")[1]
+    : null;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { error: "Unauthorized - No Token" },
-      { status: 401 }
-    );
+  let user = null;
+  if (token) {
+    user = verifyToken(token); // Verifing JWT
   }
 
-  const token = authHeader.split(" ")[1]; // get just the token
-  const user = verifyToken(token); //store decoded user details
+  // Api 
+  if (req.nextUrl.pathname.startsWith("/api/protected")) {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  if (!user) {
-    return NextResponse.json({ error: "Invalid Token" }, { status: 401 });
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-user", JSON.stringify(user));
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  console.log("Auth done", user);
+  // Frontend
+  const isProtectedPage = PROTECTED_ROUTES.some((route) =>
+    req.nextUrl.pathname.startsWith(route)
+  );
+  if (isProtectedPage && !user) {
+    return NextResponse.redirect(new URL("/login", req.url)); // Redirect unauthenticated users
+  }
 
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-user", JSON.stringify(user)); // Attaching user details to header x-user
-
-  return NextResponse.next({ request: { headers: requestHeaders } });
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/api/protected/:path*"], // applying to specific routes
+  matcher: [
+    "/api/protected/:path*",
+    "/dashboard/:path*",
+    "/tasks/:path*"
+  ],
 };
