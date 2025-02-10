@@ -29,8 +29,8 @@ export default function LoginPage() {
       if (res.data.success) {
         setSuccess(res.data.message);
         setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
+          router.push(`/dashboard/${res?.data?.data?.user?.role}`);
+        }, 1000);
       } else {
         throw new Error(res.data.message);
       }
