@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CookieBar from "@/components/cookiebar";
-import { toast } from "react-toastify";
-
 
 type Role = "performer" | "manager"; // Define allowed roles
+interface ValidationErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+}
 
 export default function SignupPage() {
   const [email, setEmail] = useState<string>("");
@@ -15,25 +18,64 @@ export default function SignupPage() {
   const [role, setRole] = useState<Role>("performer"); // Default role
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<string>("");
   const router = useRouter();
+
+  /**Validations */
+  const isValidEmail = (email: string): boolean =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const isValidPassword = (password: string): boolean =>
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
+
+  const validateInputs = (): ValidationErrors => {
+    const errors: ValidationErrors = {};
+    if (!name.trim()) errors.name = "Please enter name";
+    if (!isValidEmail(email)) errors.email = "Invalid Email format";
+    if (!isValidPassword(password))
+      errors.password =
+        "Password must be at least 8 characters, including 1 uppercase letter, 1 number, and 1 special character.";
+    return errors;
+  };
+  /**Ends */
 
   const handleSignup = async () => {
     setLoading(true);
     setError("");
 
     try {
+      const inputErrors: ValidationErrors = validateInputs();
+      console.log(inputErrors);
+      if (Object.keys(inputErrors).length > 0) {
+        throw new Error(
+          inputErrors.email ||
+            inputErrors.password ||
+            inputErrors.name
+        );
+      }
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role }),
       });
 
-      if (!res.ok) throw new Error("Signup failed. Try again.");
+      const data = await res.json();
+      console.log(data);
 
-      router.push("/dashboard");
+      if (!data.success) throw new Error(data.message);
+
+      setSuccess(data.message);
+
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 2000);
     } catch (err) {
+      console.log("err", (err as Error).message);
       setError((err as Error).message);
     } finally {
+      setTimeout(() => {
+        setError("");
+      }, 2000);
       setLoading(false);
     }
   };
@@ -48,11 +90,9 @@ export default function SignupPage() {
 
       {/* Glassmorphic Card */}
       <div className="bg-card border border-card backdrop-blur-glass p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-semibold text-center mb-6">Register to &#123;Tasket&#125;</h2>
-
-        {error && (
-          <CookieBar message="Failed to create task." type="error" />
-        )}
+        <h2 className="text-3xl font-semibold text-center mb-6">
+          Register to &#123;Tasket&#125;
+        </h2>
 
         <div className="space-y-4">
           <input
@@ -60,21 +100,21 @@ export default function SignupPage() {
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-input text-text focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
           />
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-input text-text focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-input text-text focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
           />
 
           {/* Role Selection */}
@@ -82,7 +122,10 @@ export default function SignupPage() {
             <div className="flex items-center space-x-4 justify-center">
               <label className="text-secondary font-medium">Select Role:</label>
               {(["performer", "manager"] as Role[]).map((roleOption) => (
-                <label key={roleOption} className="flex items-center space-x-2 cursor-pointer">
+                <label
+                  key={roleOption}
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="role"
@@ -91,7 +134,9 @@ export default function SignupPage() {
                     onChange={() => setRole(roleOption)}
                     className="w-4 h-4 text-primary focus:ring-primary-hover cursor-pointer"
                   />
-                  <span>{roleOption.charAt(0).toUpperCase() + roleOption.slice(1)}</span>
+                  <span>
+                    {roleOption.charAt(0).toUpperCase() + roleOption.slice(1)}
+                  </span>
                 </label>
               ))}
             </div>
@@ -102,15 +147,23 @@ export default function SignupPage() {
             className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-lg transition flex justify-center"
             disabled={loading}
           >
-            {loading ? <span className="animate-pulse">Signing up...</span> : "Sign Up"}
+            {loading ? (
+              <span className="animate-pulse">Signing up...</span>
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </div>
 
         <p className="text-secondary text-center mt-4 text-sm">
           Already have an account?{" "}
-          <a href="/auth/login" className="text-primary hover:underline">Login</a>
+          <a href="/auth/login" className="text-primary hover:underline">
+            Login
+          </a>
         </p>
       </div>
+      {error && <CookieBar message={error} type="error" />}
+      {success && <CookieBar message={success} type="success" />}
     </div>
   );
 }

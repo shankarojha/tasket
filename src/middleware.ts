@@ -9,10 +9,18 @@ export function middleware(req: NextRequest) {
   const token = authHeader?.startsWith("Bearer ")
     ? authHeader.split(" ")[1]
     : null;
+  const feToken = req.cookies.get("auth_token")?.value;
+  console.log("token", token)
+  console.log("fetoken", feToken)
 
   let user = null;
+  let feUser = null;
   if (token) {
     user = verifyToken(token); // Verifing JWT
+  }
+
+  if(feToken){
+    feUser = feToken;
   }
 
   // Api 
@@ -30,8 +38,9 @@ export function middleware(req: NextRequest) {
   const isProtectedPage = PROTECTED_ROUTES.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
-  if (isProtectedPage && !user) {
-    return NextResponse.redirect(new URL("/login", req.url)); // Redirect unauthenticated users
+  if (isProtectedPage && !feUser) {
+    console.log("here")
+    return NextResponse.redirect(new URL("/auth/login", req.url)); // Redirect users who do not have token
   }
 
   return NextResponse.next();
