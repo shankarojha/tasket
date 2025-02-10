@@ -1,55 +1,61 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "./lib/token";
+import axios from "axios";
 
-const PROTECTED_ROUTES = ["/dashboard", "/tasks"]; // frontend routes to authorize
+const PROTECTED_ROUTES = ["/dashboard", "/tasks"]; // FE routes to protect
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ")
     ? authHeader.split(" ")[1]
     : null;
-  const feToken = req.cookies.get("auth_token")?.value;
-  console.log("token", token)
-  console.log("fetoken", feToken)
+  const feToken = req.cookies.get("auth_token")?.value; // FE auth token from the cookies
+
+  console.log("Backend Token:", token);
+  console.log("Frontend Token:", feToken);
 
   let user = null;
-  let feUser = null;
+
+  // Verifying BE token
   if (token) {
-    user = verifyToken(token); // Verifing JWT
+    try {
+      const res = await axios.post(
+        `${req.nextUrl.origin}/api/auth/verifyToken`,
+        { token }
+      );
+      if (res.status === 200) user = res.data.user;
+    } catch (error: any) {
+      console.error(
+        "Token verification failed:",
+        error.response?.data || error.message
+      );
+    }
   }
 
-  if(feToken){
-    feUser = feToken;
-  }
-
-  // Api 
+  // For /api/protected protected rouites
   if (req.nextUrl.pathname.startsWith("/api/protected")) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-user", JSON.stringify(user));
+    requestHeaders.set("x-user", JSON.stringify(user)); // Attaching user info to the header x-user
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // Frontend
+  // FE Protection
   const isProtectedPage = PROTECTED_ROUTES.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
-  if (isProtectedPage && !feUser) {
-    console.log("here")
-    return NextResponse.redirect(new URL("/auth/login", req.url)); // Redirect users who do not have token
+
+  if (isProtectedPage && !feToken) {
+    console.log("Redirecting to Login: No valid frontend token");
+    return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/api/protected/:path*",
-    "/dashboard/:path*",
-    "/tasks/:path*"
-  ],
+  matcher: ["/api/protected/:path*", "/dashboard/:path*", "/tasks/:path*"],
 };
