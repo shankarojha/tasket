@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 interface Task extends mongoose.Document {
   title: string;
   description: string;
-  status: "assigned" | "in-progress" | "completed";
+  status: "assigned" | "in-progress" | "completed" | "cancelled";
   assignedTo: string;
   createdBy: string;
   priority: "low" | "medium" | "high";
@@ -20,7 +20,7 @@ const taskSchema = new mongoose.Schema(
     description: { type: String, required: true },
     status: {
       type: String,
-      enum: ["assigned", "in-progress", "completed"],
+      enum: ["assigned", "in-progress", "completed", "cancelled"],
       default: "assigned",
     },
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

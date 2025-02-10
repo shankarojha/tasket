@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ")
     ? authHeader.split(" ")[1]
-    : null;
+    : req.cookies.get("auth_token")?.value;;
   const feToken = req.cookies.get("auth_token")?.value; // FE auth token from the cookies
 
   console.log("Backend Token:", token);

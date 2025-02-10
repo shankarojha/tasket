@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { extractUser } from "@/lib/extractUser";
 import { GlobalResponse } from "@/types/globalResponse";
 
-export async function PATCH(
+export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
@@ -34,13 +34,22 @@ export async function PATCH(
       };
       return NextResponse.json(response, { status: 400 });
     }
-    const reqBody = await req.json();
 
-    const updatedTask = await Task.findByIdAndUpdate(taskId, reqBody);
+    const task = await Task.findOne({ _id: taskId });
+    if (!task) {
+      const response: GlobalResponse = {
+        success: false,
+        message: "Taskid Missing",
+        data: null,
+        error: "Taskid Missing",
+      };
+      return NextResponse.json(response, { status: 404 });
+    }
+
     const response: GlobalResponse = {
       success: true,
-      message: "Task updated successfully",
-      data: updatedTask,
+      message: "Task fetched successfully",
+      data: task,
       error: null,
     };
 
@@ -48,7 +57,7 @@ export async function PATCH(
   } catch (error) {
     const response: GlobalResponse = {
       success: false,
-      message: "Error updating task",
+      message: "Error fetching task",
       data: null,
       error: (error as Error).message,
     };

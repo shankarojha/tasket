@@ -6,6 +6,7 @@ import CookieBar from "@/components/cookiebar";
 import axios from "axios";
 import axiosInstance from "@/lib/axiosInstance";
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -20,14 +21,15 @@ export default function LoginPage() {
       setLoading(true);
       setError("");
 
-      const res = await axiosInstance.post("/auth/login", {email,password
-      });
+      const res = await axiosInstance.post("/auth/login", { email, password });
 
-      console.log(res)
+      console.log(res);
       setLoading(false);
 
       if (res.data.success) {
         setSuccess(res.data.message);
+        localStorage.setItem("user", JSON.stringify(res?.data?.data?.user));
+
         setTimeout(() => {
           router.push(`/dashboard/${res?.data?.data?.user?.role}`);
         }, 1000);

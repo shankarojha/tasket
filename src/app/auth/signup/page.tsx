@@ -48,9 +48,7 @@ export default function SignupPage() {
       console.log(inputErrors);
       if (Object.keys(inputErrors).length > 0) {
         throw new Error(
-          inputErrors.email ||
-            inputErrors.password ||
-            inputErrors.name
+          inputErrors.email || inputErrors.password || inputErrors.name
         );
       }
       const res = await fetch("/api/auth/signup", {
