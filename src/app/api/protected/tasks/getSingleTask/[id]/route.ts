@@ -35,7 +35,10 @@ export async function GET(
       return NextResponse.json(response, { status: 400 });
     }
 
-    const task = await Task.findOne({ _id: taskId });
+    const task = await Task.findOne({ _id: taskId })
+      .populate("assignedTo")
+      .populate("createdBy")
+      .lean();
     if (!task) {
       const response: GlobalResponse = {
         success: false,

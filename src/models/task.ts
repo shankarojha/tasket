@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import User from "./user";
 
 interface Task extends mongoose.Document {
   title: string;
@@ -23,8 +24,8 @@ const taskSchema = new mongoose.Schema(
       enum: ["assigned", "in-progress", "completed", "cancelled"],
       default: "assigned",
     },
-    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: User },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: User },
     priority: {
       type: String,
       enum: ["low", "medium", "high"],

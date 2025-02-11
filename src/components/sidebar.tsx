@@ -1,8 +1,8 @@
 "use client";
-
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import Style  from "@/styles/sidebar.module.css";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,56 +10,40 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Toggle Button for Mobile */}
+      {/* Fixed Button (Independent of Sidebar) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="sm:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-primary hover:bg-primary-hover text-white"
+        className={`fixed top-1 left-4 z-50 p-2 rounded-lg bg-text-secondary hover:bg-primary-hover text-text sm:hidden `  }
       >
-        {isOpen ? <X size={20} /> : <Menu size={24} />}
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Sidebar */}
+      {/* Sidebar (Fixed & Doesn't Move) */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen bg-background text-text-secondary p-5 transition-transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 left-0 z-40 md:w-100 lg:w-64 h-screen bg-background text-text-secondary p-5 transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-64"
         } sm:translate-x-0`}
       >
         <div className="mt-6">
           <h1 className="p-3 text-lg">&#123;Tasket&#125;</h1>
+
           {/* Navigation Links */}
           <ul className="space-y-4 mt-6">
-            <li>
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="p-3 rounded-lg hover:bg-text-secondary hover:text-text w-full text-left"
-              >
-                Dashboard
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => router.push("/tasks")}
-                className="p-3 rounded-lg hover:bg-text-secondary hover:text-text w-full text-left"
-              >
-                Tasks
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => router.push("/profile")}
-                className="p-3 rounded-lg hover:bg-text-secondary hover:text-text w-full text-left"
-              >
-                Profile
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => router.push("/logout")}
-                className="p-3 rounded-lg hover:bg-text-secondary hover:text-text w-full text-left"
-              >
-                Logout
-              </button>
-            </li>
+            {[
+              { name: "Dashboard", path: "/dashboard" },
+              { name: "Tasks", path: "/tasks" },
+              { name: "Profile", path: "/profile" },
+              { name: "Logout", path: "/logout" },
+            ].map(({ name, path }) => (
+              <li key={path}>
+                <button
+                  onClick={() => router.push(path)}
+                  className="p-3 rounded-lg hover:bg-text-secondary hover:text-text w-full text-left"
+                >
+                  {name}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
       </aside>
