@@ -6,8 +6,9 @@ import { extractUser } from "@/lib/extractUser";
 
 export async function POST(req: Request) {
   try {
-    const { title, description, assignedTo, priority, dueDate } =
+    const { formData } =
       await req.json();
+      const { title, description, assignedTo, priority, dueDate } = formData
     const user = extractUser(req);
     if (!user) {
       const response: GlobalResponse = {
