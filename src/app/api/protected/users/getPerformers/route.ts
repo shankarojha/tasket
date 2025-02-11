@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Task from "@/models/task";
+import User from "@/models/user";
 import mongoose from "mongoose";
 import { extractUser } from "@/lib/extractUser";
 import { GlobalResponse } from "@/types/globalResponse";
@@ -23,35 +24,32 @@ export async function GET(
       return NextResponse.json(response, { status: 401 });
     }
 
-    const userId = params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Invalid Task ID",
-        data: null,
-        error: "Invalid Task ID",
-      };
-      return NextResponse.json(response, { status: 400 });
+    const userRole: string = user.role;
+    if(userRole !== "manager"){
+        const response: GlobalResponse = {
+            success: false,
+            message: "Unauthorized access",
+            data: null,
+            error: "Unauthorized access",
+          };
+    
+          return NextResponse.json(response, { status: 401 });
     }
-
-    const task = await Task.find({ assignedTo: userId })
-      .populate("assignedTo")
-      .populate("createdBy")
+    const users = await User.find({ role: "performer" })
       .lean();
-    if (task.length === 0) {
+    if (users.length === 0) {
       const response: GlobalResponse = {
         success: false,
-        message: "No tasks assigned",
+        message: "No users found",
         data: null,
-        error: "No tasks assigned",
+        error: "No users found",
       };
       return NextResponse.json(response, { status: 404 });
     }
     const response: GlobalResponse = {
       success: true,
       message: "Tasks fetched successfully",
-      data: task,
+      data: users,
       error: null,
     };
 
