@@ -20,7 +20,7 @@ export default function ProtectedLayout({
         <aside className="md:col-span-3 xl:col-span-2"><Sidebar /></aside>}
 
         {/* Main Content */}
-        <main className=" md:col-span-9  xl:col-span-10 w-full p-2">
+        <main className=" md:col-span-9  xl:col-span-10 w-full p-2 content-center">
           <LoaderProvider>
             {children}
           </LoaderProvider>

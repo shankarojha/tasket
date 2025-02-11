@@ -45,7 +45,7 @@ const Sidebar = () => {
             {[
               { name: "Assigned Tasks", path: `/dashboard/performer` },
               { name: "Managed Tasks", path: "/dashboard/manager" },
-              { name: "Create Task", path: "/task/createTask" },
+              { name: "Create Task", path: "/tasks/createTask" },
               { name: "Profile", path: "/profile" },
               { name: "Logout", path: "/logout" },
             ].map(({ name, path }) => (
