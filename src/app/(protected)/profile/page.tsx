@@ -33,8 +33,10 @@ export default function ProfilePage() {
       if (!response.success) throw new Error(response.message);
 
       setSuccess(response.message);
+      setShowPasswordInput(false);
     } catch (err) {
-      setError((err as Error)?.message || "Failed to create task");
+        setSuccess("")
+      setError((err as Error)?.message || "Failed to update password");
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export default function ProfilePage() {
   }, []);
 
   if (loading) {
-    return <Loader/>
+    return <Loader />;
   }
 
   return (
@@ -114,12 +116,12 @@ export default function ProfilePage() {
             className="mt-4 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
             onClick={(e) => handleSubmit(e)}
           >
-            Change Password
+            Submit
           </button>
         </div>
       )}
       {error && <CookieBar message={error} type="error" />}
-                  {success && <CookieBar message={success} type="success" />}
+      {success && <CookieBar message={success} type="success" />}
     </div>
   );
 }
