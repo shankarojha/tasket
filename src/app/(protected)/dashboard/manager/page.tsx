@@ -94,8 +94,8 @@ export default function TasksPage() {
             priority === "high"
               ? "red"
               : priority === "medium"
-              ? "blue"
-              : "gray"
+              ? "yellow"
+              : "blue"
           }
         >
           <span className="text-xs md:text-sm">{priority}</span>
@@ -156,8 +156,8 @@ export default function TasksPage() {
                   selectedTask.priority === "high"
                     ? "red"
                     : selectedTask.priority === "medium"
-                    ? "blue"
-                    : "gray"
+                    ? "yellow"
+                    : "blue"
                 }
               >
                 {selectedTask.priority}

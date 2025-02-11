@@ -7,9 +7,12 @@ import { extractUser } from "@/lib/extractUser";
 import { GlobalResponse } from "@/types/globalResponse";
 
 export async function GET(
-  req: Request) {
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectDB();
+    const userId = params.id;
     const user = extractUser(req);
     if (!user) {
       const response: GlobalResponse = {
@@ -20,22 +23,9 @@ export async function GET(
       };
 
       return NextResponse.json(response, { status: 401 });
-    }
-
-    const userRole: string = user.role;
-    if(userRole !== "manager"){
-        const response: GlobalResponse = {
-            success: false,
-            message: "Unauthorized access",
-            data: null,
-            error: "Unauthorized access",
-          };
-    
-          return NextResponse.json(response, { status: 401 });
-    }
-    const users = await User.find({ role: "performer" })
-      .lean();
-    if (users.length === 0) {
+    }    
+    const users = await User.findById({ _id: userId }).lean();
+    if (!users) {
       const response: GlobalResponse = {
         success: false,
         message: "No users found",
