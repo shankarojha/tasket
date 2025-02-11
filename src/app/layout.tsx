@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <body className="min-h-screen bg-text text-text w-full">
+      <body className="min-h-screen bg-card-border text-text w-full">
         {children}
       </body>
     </html>

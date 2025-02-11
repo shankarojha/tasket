@@ -1,6 +1,7 @@
 "use client";
 import Sidebar from "@/components/sidebar";
 import { usePathname } from "next/navigation";
+import { LoaderProvider } from "@/app/context/loaderContext";
 
 export default function ProtectedLayout({
   children,
@@ -15,13 +16,14 @@ export default function ProtectedLayout({
 
   return (
       <div className="grid md:grid-cols-12 gap-1 w-full">
-        {/* Sidebar (Position Fixed) */}
         {showSidebar && 
-        <aside className="md:col-span-3"><Sidebar /></aside>}
+        <aside className="md:col-span-3 xl:col-span-2"><Sidebar /></aside>}
 
         {/* Main Content */}
-        <main className=" md:col-span-9 w-full p-2">
+        <main className=" md:col-span-9  xl:col-span-10 w-full p-2">
+          <LoaderProvider>
             {children}
+          </LoaderProvider>
         </main>
       </div>
   );

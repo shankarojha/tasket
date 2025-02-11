@@ -23,3 +23,12 @@ export interface Task{
   comments: string;
   _id:string;
 }
+
+export interface User {
+  createdAt: string | null;
+  email: string | null;
+  name: string | null;
+  role: string | null;
+  updatedAt: string | null;
+  _id: string | null;
+}
