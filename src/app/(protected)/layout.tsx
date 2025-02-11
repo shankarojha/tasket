@@ -10,9 +10,10 @@ export default function ProtectedLayout({
 }) {
   const pathname = usePathname();
 
-  // Show sidebar only for specific routes
-  const showSidebar =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/tasks");
+  const sideBarRoutes: string[] = ["/dashboard", "/tasks", "/profile"]; //routes that has sidebar
+
+// Show sidebar only for specific routes
+const showSidebar = sideBarRoutes.some(route => pathname.startsWith(route));
 
   return (
       <div className="grid md:grid-cols-12 gap-1 w-full">
