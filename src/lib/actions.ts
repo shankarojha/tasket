@@ -39,3 +39,10 @@ export const updatePassword = async (formData: any) => {
   });
   return response.data;
 };
+
+export const updateTask = async (formData: any) => {
+  const response = await axiosInstance.patch(`protected/tasks/updateTask/${formData.taskId}`, {
+    formData,
+  });
+  return response.data;
+};

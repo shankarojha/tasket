@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     const token = generateToken(userWoPassword);
     cookies().set("auth_token", token, {
       httpOnly: true,
-      secure: false,
+      secure: false, //since we are using http ec2
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
