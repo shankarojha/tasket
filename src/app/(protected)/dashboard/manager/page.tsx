@@ -6,7 +6,8 @@ import { Table, Tag, Button, Modal, Form, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Task } from "@/types/mongodbtypes";
 import { User } from "@/types/mongodbtypes";
-import { getUsersToAssign } from "@/lib/actions";
+import { getUsersToAssign, updateTask } from "@/lib/actions";
+import CookieBar from "@/components/cookiebar";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -16,6 +17,7 @@ export default function TasksPage() {
   const [showInput, setShowInput] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
   const [form] = Form.useForm();
 
@@ -24,11 +26,11 @@ export default function TasksPage() {
   }, []);
 
   useEffect(() => {
-    handleGetUsers()
+    console.log(selectedTask);
+
+    handleGetUsers();
     if (selectedTask) {
-      console.log(selectedTask)
       form.setFieldsValue({
-        taskId:selectedTask._id,
         title: selectedTask.title,
         status: selectedTask.status,
         priority: selectedTask.priority,
@@ -38,22 +40,22 @@ export default function TasksPage() {
       });
     }
   }, [selectedTask, form]);
-
+  //get users for assignedToselect dropdown
   const handleGetUsers = async () => {
-      try {
-        const users = await getUsersToAssign();
-        setUsers(users?.data);
-      } catch (err) {
-        console.error(error);
-        setError((err as Error).message);
-      } finally {
-        setTimeout(() => {
-          setError("");
-        }, 2000);
-        setLoading(false);
-      }
-    };
-
+    try {
+      const users = await getUsersToAssign();
+      setUsers(users?.data);
+    } catch (err) {
+      console.error(error);
+      setError((err as Error).message);
+    } finally {
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+      setLoading(false);
+    }
+  };
+  //fetch task
   const fetchTasks = async () => {
     setLoading(true);
     try {
@@ -68,23 +70,47 @@ export default function TasksPage() {
     }
     setLoading(false);
   };
-
+  //moda show handler
   const showDetails = (task: Task) => {
     setSelectedTask(task);
     setModalVisible(true);
   };
 
-  const handleUpdateTask = (value: Task) => {
-    console.log(value);
-    form.resetFields();
-  };
+  //submit handler
 
+  const handleUpdateTask = async (value: Task) => {
+    console.log(value);
+    if (selectedTask) {
+      const formData = { ...value, taskId: selectedTask._id };
+
+      console.log(formData);
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await updateTask(formData);
+        if (!response.success) throw new Error(response.message);
+        setSuccess(response.message);
+        await fetchTasks();
+        setTimeout(() => {
+          handleModalClose();
+        }, 1500);
+      } catch (err) {
+        setError((err as Error)?.message || "Failed to create task");
+      } finally {
+        setLoading(false);
+        form.resetFields();
+      }
+    }
+  };
+  //modal close handler
   const handleModalClose = () => {
     setModalVisible(false);
     form.resetFields();
     setShowInput(false);
   };
-
+  //defining the data columns
   const columns: ColumnsType<Task> = [
     {
       title: <span className="text-xs md:text-sm">Task</span>,
@@ -271,9 +297,12 @@ export default function TasksPage() {
 
               <Form.Item label="Assign to" name="assignedTo">
                 <Select>
-                  {users && users.map((user)=>(
-                    <Select.Option key={user._id} value={user._id}>{user.name}</Select.Option>
-                  ))}
+                  {users &&
+                    users.map((user) => (
+                      <Select.Option key={user._id} value={user._id}>
+                        {user.name}
+                      </Select.Option>
+                    ))}
                 </Select>
               </Form.Item>
 
@@ -295,13 +324,15 @@ export default function TasksPage() {
 
               <Form.Item>
                 <Button type="primary" htmlType="submit">
-                  Update Task
+                  {loading ? "Updating..." : "Update Task"}
                 </Button>
               </Form.Item>
             </Form>
           )}
         </Modal>
       )}
+      {error && <CookieBar message={error} type="error" />}
+      {success && <CookieBar message={success} type="success" />}
     </div>
   );
 }

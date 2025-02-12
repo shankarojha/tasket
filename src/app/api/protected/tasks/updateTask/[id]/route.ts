@@ -23,8 +23,8 @@ export async function PATCH(
       return NextResponse.json(response, { status: 400 });
     }
     const reqBody = await req.json();
-
-    const updatedTask = await Task.findByIdAndUpdate(taskId, reqBody);
+    console.log("taskId", reqBody)
+    const updatedTask = await Task.findByIdAndUpdate({_id:taskId}, reqBody.formData);
     const response: GlobalResponse = {
       success: true,
       message: "Task updated successfully",
