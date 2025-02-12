@@ -6,8 +6,8 @@ import { verifyToken } from "@/lib/token";
 export async function POST(req: Request) {
   try {
     const { token } = await req.json();
-    console.log("token", token)
-    
+    console.log("tokessssssssn", token)
+
 
 
     if (!token) {

@@ -10,19 +10,8 @@ export async function PATCH(req: Request) {
     await connectDB();
     const { formData } =
       await req.json();
-      const { oldPassword, newPassword } = formData
-    const user = extractUser(req);
-    if (!user) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Unauthorized access",
-        data: null,
-        error: "Unauthorized access",
-      };
-
-      return NextResponse.json(response, { status: 401 });
-    }
-    console.log("user:", user._id);
+      const { userId, oldPassword, newPassword } = formData
+    
     if (!oldPassword || !newPassword) {
       const response: GlobalResponse = {
         success: false,
@@ -33,7 +22,7 @@ export async function PATCH(req: Request) {
 
       return NextResponse.json(response, { status: 401 });
     }
-    const validUser = await User.findById({_id:user._id});
+    const validUser = await User.findById({_id:userId});
     if(!validUser){
         const response: GlobalResponse = {
             success: false,
@@ -59,7 +48,7 @@ export async function PATCH(req: Request) {
     const hashedPassword = await bcrypt.hash(newPassword, 10)
 
     
-    const update = await User.updateOne({_id:user._id},{password:hashedPassword})
+    const update = await User.updateOne({_id:userId},{password:hashedPassword})
 
     const response: GlobalResponse = {
       success: true,

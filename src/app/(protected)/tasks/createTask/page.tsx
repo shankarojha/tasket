@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import {User} from '@/types/mongodbtypes'
+import { User } from "@/types/mongodbtypes";
 import { createUser, getUsersToAssign } from "@/lib/actions";
 import CookieBar from "@/components/cookiebar";
 
@@ -15,12 +15,14 @@ export default function CreateTaskPage() {
     assignedTo: "",
     priority: "",
     dueDate: "",
+    createdBy: ""
   });
+  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
   const [success, setSuccess] = useState<string>("");
-  const priorityList = ["low", "medium", "high"]
+  const priorityList = ["low", "medium", "high"];
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,7 +34,7 @@ export default function CreateTaskPage() {
     setError("");
 
     try {
-      const response = await createUser(formData)
+      const response = await createUser(formData);
       if (!response.success) throw new Error(response.message);
 
       setSuccess(response.message);
@@ -51,20 +53,29 @@ export default function CreateTaskPage() {
     try {
       const users = await getUsersToAssign();
       setUsers(users?.data);
-    }catch(err){
+    } catch (err) {
       console.error(error);
       setError((err as Error).message);
-    }finally{
+    } finally {
       setTimeout(() => {
         setError("");
       }, 2000);
       setLoading(false);
     }
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setFormData((prev) => ({ ...prev, createdBy: parsedUser._id }));
+      }
+    }
     handleGetUsers();
-  },[])
+
+  }, []);
 
   return (
     <div className="flex justify-center min-h-screen backdrop-blur-glass">
@@ -88,7 +99,7 @@ export default function CreateTaskPage() {
             required
             className="w-full p-2 border rounded-lg text-text bg-background-gradient"
           />
-          
+
           <select
             name="assignedTo"
             value={formData.assignedTo}
@@ -97,9 +108,12 @@ export default function CreateTaskPage() {
             className="w-full p-2 border rounded-lg text-text bg-background-gradient"
           >
             <option value="">Assign To</option>
-            {users && users.map((user) => (
-              <option key={user._id as string} value={user._id as string}>{user.name}</option>
-            ))}
+            {users &&
+              users.map((user) => (
+                <option key={user._id as string} value={user._id as string}>
+                  {user.name}
+                </option>
+              ))}
           </select>
 
           <select
@@ -110,9 +124,12 @@ export default function CreateTaskPage() {
             className="w-full p-2 border rounded-lg text-text bg-background-gradient"
           >
             <option value="">Priority</option>
-            {priorityList && priorityList.map((priority) => (
-              <option key={priority as string} value={priority as string}>{priority}</option>
-            ))}
+            {priorityList &&
+              priorityList.map((priority) => (
+                <option key={priority as string} value={priority as string}>
+                  {priority}
+                </option>
+              ))}
           </select>
 
           <input
@@ -133,7 +150,7 @@ export default function CreateTaskPage() {
         </form>
       </div>
       {error && <CookieBar message={error} type="error" />}
-            {success && <CookieBar message={success} type="success" />}
+      {success && <CookieBar message={success} type="success" />}
     </div>
   );
 }

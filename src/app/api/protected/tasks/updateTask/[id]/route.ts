@@ -11,18 +11,6 @@ export async function PATCH(
 ) {
   try {
     await connectDB();
-    const user = extractUser(req);
-    if (!user) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Unauthorized access",
-        data: null,
-        error: "Unauthorized access",
-      };
-
-      return NextResponse.json(response, { status: 401 });
-    }
-
     const taskId = params.id;
 
     if (!mongoose.Types.ObjectId.isValid(taskId)) {

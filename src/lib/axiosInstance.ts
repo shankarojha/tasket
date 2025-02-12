@@ -5,7 +5,18 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // ✅ Send cookies with every request
+  withCredentials: true, // send cookies
+});
+
+// Add token dynamically in request interceptor
+axiosInstance.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("authorization");
+    if (token) {
+      config.headers["Authorization"] = token;
+    }
+  }
+  return config;
 });
 
 export default axiosInstance;

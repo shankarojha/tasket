@@ -6,21 +6,9 @@ import { extractUser } from "@/lib/extractUser";
 
 export async function POST(req: Request) {
   try {
-    const { formData } =
-      await req.json();
-      const { title, description, assignedTo, priority, dueDate } = formData
-    const user = extractUser(req);
-    if (!user) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Unauthorized access",
-        data: null,
-        error: "Unauthorized access",
-      };
-
-      return NextResponse.json(response, { status: 401 });
-    }
-    console.log("user:", user._id);
+    const { formData } = await req.json();
+    const { title, description, assignedTo, priority, dueDate, createdBy } = formData;
+    
     if (!title || !description || !dueDate) {
       const response: GlobalResponse = {
         success: false,
@@ -38,7 +26,7 @@ export async function POST(req: Request) {
       description,
       status: "assigned",
       assignedTo,
-      createdBy: user._id,
+      createdBy: createdBy,
       priority: priority || "medium",
       dueDate,
     });
