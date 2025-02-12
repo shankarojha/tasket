@@ -46,3 +46,8 @@ export const updateTask = async (formData: any) => {
   });
   return response.data;
 };
+
+export const deleteTask = async (taskId: string) => {
+  const response = await axiosInstance.delete(`protected/tasks/deleteTask/${taskId}`);
+  return response.data;
+};

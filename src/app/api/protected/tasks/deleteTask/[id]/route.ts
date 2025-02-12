@@ -3,12 +3,10 @@ import { connectDB } from "@/lib/db";
 import { GlobalResponse } from "@/types/globalResponse";
 import Task from "@/models/task";
 
-export async function PATCH(req: Request) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     await connectDB();
-    const { formData } = await req.json();
-    const { taskId } = formData;
-
+    const taskId = params.id;
     if (!taskId) {
       const response: GlobalResponse = {
         success: false,
@@ -20,15 +18,11 @@ export async function PATCH(req: Request) {
       return NextResponse.json(response, { status: 401 });
     }
 
-    const update = await Task.updateOne(
-      { _id: taskId },
-      { status: "cancelled" }
-    );
-
+    await Task.findByIdAndDelete({_id:taskId});
     const response: GlobalResponse = {
       success: true,
-      message: "Password updated successfully",
-      data: update,
+      message: "Deleted successfully",
+      data: null,
       error: null,
     };
 
