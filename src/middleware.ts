@@ -16,17 +16,14 @@ export async function middleware(req: NextRequest) {
   const token = cookieStore.get("auth_token")?.value
   const feToken = cookieStore.get("auth_token")?.value
 
-  console.log("Backend Token:", token);
-  console.log("Frontend Token:", feToken);
-
   let user = null;
 
   // Verifying BE token
   if (token) {
     try {
       const res = await axios.post(
-        //`http://35.154.85.104/api/auth/verifyToken`,
-        `${req.nextUrl.origin}/api/auth/verifyToken`,
+        `http://35.154.85.104/api/auth/verifyToken`,
+        // `${req.nextUrl.origin}/api/auth/verifyToken`,
         { token }
       );
       if (res.status === 200) user = res.data.user;
@@ -61,7 +58,7 @@ export async function middleware(req: NextRequest) {
   );
 
   if (isProtectedPage && !feToken) {
-    console.log("Redirecting to Login: No valid frontend token");
+    //console.log("Redirecting to Login: No valid frontend token");
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 

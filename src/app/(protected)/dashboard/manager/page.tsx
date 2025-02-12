@@ -1,12 +1,16 @@
 "use client";
-import { getTasksByUser } from "@/lib/actions";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { Table, Tag, Button, Modal, Form, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Task } from "@/types/mongodbtypes";
 import { User } from "@/types/mongodbtypes";
-import { getUsersToAssign, updateTask } from "@/lib/actions";
+import {
+  getTasksByUser,
+  getUsersToAssign,
+  updateTask,
+  deleteTask,
+} from "@/lib/actions";
 import CookieBar from "@/components/cookiebar";
 
 export default function TasksPage() {
@@ -26,8 +30,6 @@ export default function TasksPage() {
   }, []);
 
   useEffect(() => {
-    console.log(selectedTask);
-
     handleGetUsers();
     if (selectedTask) {
       form.setFieldsValue({
@@ -79,11 +81,8 @@ export default function TasksPage() {
   //submit handler
 
   const handleUpdateTask = async (value: Task) => {
-    console.log(value);
     if (selectedTask) {
       const formData = { ...value, taskId: selectedTask._id };
-
-      console.log(formData);
 
       try {
         setLoading(true);
@@ -97,7 +96,7 @@ export default function TasksPage() {
           handleModalClose();
         }, 1500);
       } catch (err) {
-        setError((err as Error)?.message || "Failed to create task");
+        setError((err as Error)?.message || "Failed to update task");
       } finally {
         setLoading(false);
         form.resetFields();
@@ -109,6 +108,30 @@ export default function TasksPage() {
     setModalVisible(false);
     form.resetFields();
     setShowInput(false);
+  };
+
+  //delete task handler
+  const handleDeleteTask = async () => {
+    if (selectedTask) {
+      const taskId = selectedTask._id;
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await deleteTask(taskId);
+        if (!response.success) throw new Error(response.message);
+        setSuccess(response.message);
+        await fetchTasks();
+        setTimeout(() => {
+          handleModalClose();
+        }, 1500);
+      } catch (err) {
+        setError((err as Error)?.message || "Failed to delete task");
+      } finally {
+        setLoading(false);
+      }
+    }
   };
   //defining the data columns
   const columns: ColumnsType<Task> = [
@@ -258,12 +281,20 @@ export default function TasksPage() {
                 <strong>Description:</strong>{" "}
                 {selectedTask.description || "No description provided"}
               </p>
-              <button
-                className="mt-4 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => setShowInput(true)}
-              >
-                Edit
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  className="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => setShowInput(true)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="mt-4 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => handleDeleteTask()}
+                >
+                  {loading ? "Deleting..." : "Delete"}
+                </button>
+              </div>
             </div>
           )}
         </Modal>

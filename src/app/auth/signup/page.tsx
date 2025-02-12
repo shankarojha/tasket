@@ -45,7 +45,6 @@ export default function SignupPage() {
 
     try {
       const inputErrors: ValidationErrors = validateInputs();
-      console.log(inputErrors);
       if (Object.keys(inputErrors).length > 0) {
         throw new Error(
           inputErrors.email || inputErrors.password || inputErrors.name
@@ -58,7 +57,6 @@ export default function SignupPage() {
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (!data.success) throw new Error(data.message);
 
