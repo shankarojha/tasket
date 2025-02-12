@@ -10,7 +10,6 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [password, setPassword] = useState<string>("");
   const [showPasswordInput, setShowPasswordInput] = useState<boolean>(false);
   const [success, setSuccess] = useState<string>("");
 
@@ -18,6 +17,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     oldPassword: "",
     newPassword: "",
+    userId:user? user._id : ""
   });
 
   const handleChange = (e: any) => {
@@ -49,6 +49,7 @@ export default function ProfilePage() {
         if (user?._id) {
           const response = await getProfile(user?._id);
           setUser(response.data);
+          setFormData((prev) => ({ ...prev, userId: user? user._id:"" }));
         }
       } catch (err) {
         setError("Failed to fetch user details.");

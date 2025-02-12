@@ -11,18 +11,6 @@ export async function PATCH(
 ) {
   try {
     await connectDB();
-    const user = extractUser(req);
-    if (!user) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Unauthorized access",
-        data: null,
-        error: "Unauthorized access",
-      };
-
-      return NextResponse.json(response, { status: 401 });
-    }
-
     const taskId = params.id;
 
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
@@ -35,8 +23,8 @@ export async function PATCH(
       return NextResponse.json(response, { status: 400 });
     }
     const reqBody = await req.json();
-
-    const updatedTask = await Task.findByIdAndUpdate(taskId, reqBody);
+    console.log("taskId", reqBody)
+    const updatedTask = await Task.findByIdAndUpdate({_id:taskId}, reqBody.formData);
     const response: GlobalResponse = {
       success: true,
       message: "Task updated successfully",

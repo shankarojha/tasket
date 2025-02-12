@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Task from "@/models/task";
 import { GlobalResponse } from "@/types/globalResponse";
-import { extractUser } from "@/lib/extractUser";
+import Task from "@/models/task";
 
-export async function POST(req: Request) {
+export async function PATCH(req: Request) {
   try {
+    await connectDB();
     const { formData } = await req.json();
-    const { title, description, assignedTo, priority, dueDate, createdBy } = formData;
-    
-    if (!title || !description || !dueDate) {
+    const { taskId } = formData;
+
+    if (!taskId) {
       const response: GlobalResponse = {
         success: false,
         message: "Missing inpts",
@@ -20,21 +20,15 @@ export async function POST(req: Request) {
       return NextResponse.json(response, { status: 401 });
     }
 
-    await connectDB();
-    const newTask = await Task.create({
-      title,
-      description,
-      status: "assigned",
-      assignedTo,
-      createdBy: createdBy,
-      priority: priority || "medium",
-      dueDate,
-    });
+    const update = await Task.updateOne(
+      { _id: taskId },
+      { status: "cancelled" }
+    );
 
     const response: GlobalResponse = {
       success: true,
-      message: "Task created successfully",
-      data: newTask,
+      message: "Password updated successfully",
+      data: update,
       error: null,
     };
 

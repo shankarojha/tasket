@@ -10,29 +10,9 @@ export async function GET(
   req: Request) {
   try {
     await connectDB();
-    const user = extractUser(req);
-    if (!user) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Unauthorized access",
-        data: null,
-        error: "Unauthorized access",
-      };
-
-      return NextResponse.json(response, { status: 401 });
-    }
-
-    const userRole: string = user.role;
-    if(userRole !== "manager"){
-        const response: GlobalResponse = {
-            success: false,
-            message: "Unauthorized access",
-            data: null,
-            error: "Unauthorized access",
-          };
     
-          return NextResponse.json(response, { status: 401 });
-    }
+
+    
     const users = await User.find({ role: "performer" })
       .lean();
     if (users.length === 0) {

@@ -13,17 +13,7 @@ export async function GET(
   try {
     await connectDB();
     const userId = params.id;
-    const user = extractUser(req);
-    if (!user) {
-      const response: GlobalResponse = {
-        success: false,
-        message: "Unauthorized access",
-        data: null,
-        error: "Unauthorized access",
-      };
-
-      return NextResponse.json(response, { status: 401 });
-    }    
+      
     const users = await User.findById({ _id: userId }).lean();
     if (!users) {
       const response: GlobalResponse = {
