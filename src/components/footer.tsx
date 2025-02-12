@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-      <footer className="bg-text text-white py-4 text-center">
+      <footer className="fixed bottom-0 left-0 w-full bg-text text-white py-4 text-center">
         <p className="text-sm">© {new Date().getFullYear()} Shankar Ojha</p>
         <div className="flex justify-center space-x-4 mt-2">
           <a
