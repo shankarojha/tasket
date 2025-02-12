@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Task from "@/models/task";
 import { GlobalResponse } from "@/types/globalResponse";
-import { extractUser } from "@/lib/extractUser";
 
 export async function POST(req: Request) {
   try {

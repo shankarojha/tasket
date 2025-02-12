@@ -24,7 +24,7 @@ export async function GET(
       };
       return NextResponse.json(response, { status: 400 });
     }
-
+    //get the task
     const task = await Task.findOne({ _id: taskId })
       .populate("assignedTo")
       .populate("createdBy")

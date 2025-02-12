@@ -6,7 +6,6 @@ import CookieBar from "@/components/cookiebar";
 import axios from "axios";
 import axiosInstance from "@/lib/axiosInstance";
 
-
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -23,7 +22,6 @@ export default function LoginPage() {
 
       const res = await axiosInstance.post("/auth/login", { email, password });
 
-      console.log(res);
       setLoading(false);
 
       if (res.data.success) {

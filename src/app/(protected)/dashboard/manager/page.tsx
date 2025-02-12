@@ -5,7 +5,12 @@ import { Table, Tag, Button, Modal, Form, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Task } from "@/types/mongodbtypes";
 import { User } from "@/types/mongodbtypes";
-import {getTasksByUser, getUsersToAssign, updateTask, deleteTask } from "@/lib/actions";
+import {
+  getTasksByUser,
+  getUsersToAssign,
+  updateTask,
+  deleteTask,
+} from "@/lib/actions";
 import CookieBar from "@/components/cookiebar";
 
 export default function TasksPage() {
@@ -25,8 +30,6 @@ export default function TasksPage() {
   }, []);
 
   useEffect(() => {
-    console.log(selectedTask);
-
     handleGetUsers();
     if (selectedTask) {
       form.setFieldsValue({
@@ -78,11 +81,8 @@ export default function TasksPage() {
   //submit handler
 
   const handleUpdateTask = async (value: Task) => {
-    console.log(value);
     if (selectedTask) {
       const formData = { ...value, taskId: selectedTask._id };
-
-      console.log(formData);
 
       try {
         setLoading(true);
@@ -111,10 +111,9 @@ export default function TasksPage() {
   };
 
   //delete task handler
-  const handleDeleteTask = async() =>{
+  const handleDeleteTask = async () => {
     if (selectedTask) {
-      const taskId = selectedTask._id
-      console.log(taskId);
+      const taskId = selectedTask._id;
 
       try {
         setLoading(true);
@@ -133,7 +132,7 @@ export default function TasksPage() {
         setLoading(false);
       }
     }
-  }
+  };
   //defining the data columns
   const columns: ColumnsType<Task> = [
     {
@@ -283,18 +282,18 @@ export default function TasksPage() {
                 {selectedTask.description || "No description provided"}
               </p>
               <div className="grid grid-cols-2 gap-2">
-              <button
-                className="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => setShowInput(true)}
-              >
-                Edit
-              </button>
-              <button
-                className="mt-4 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => handleDeleteTask()}
-              >
-                {loading? "Deleting...":"Delete"}
-              </button>
+                <button
+                  className="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => setShowInput(true)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="mt-4 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => handleDeleteTask()}
+                >
+                  {loading ? "Deleting..." : "Delete"}
+                </button>
               </div>
             </div>
           )}
