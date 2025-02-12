@@ -1,104 +1,72 @@
-// import { NextResponse } from "next/server";
-// import type { NextRequest } from "next/server";
-
-// const PROTECTED_ROUTES = ["/dashboard", "/tasks"]; // FE routes to protect
-
-// export async function middleware(req: NextRequest) {
-//   const authHeader = req.headers.get("authorization");
-//   const token = authHeader || req.cookies.get("auth_token")?.value;
-  
-//   console.log("Backend Token:", token);
-//   console.log("Authorization Header:", authHeader);
-
-//   let user = null;
-
-//   // Verify BE token using fetch (Axios does not work in Edge Middleware)
-//   if (token) {
-//     try {
-//       const res = await fetch(`${req.nextUrl.origin}/api/auth/verifyToken`, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${token}`, // Ensure token is sent correctly
-//         },
-//         body: JSON.stringify({ token }),
-//       });
-
-//       if (res.ok) {
-//         user = await res.json();
-//       } else {
-//         console.error("Token verification failed:", await res.json());
-//       }
-//     } catch (error) {
-//       console.error("Middleware Error: Failed to verify token", error);
-//     }
-//   }
-
-//   // Protect API routes
-//   if (req.nextUrl.pathname.startsWith("/api/protected")) {
-//     if (!user) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-//     const requestHeaders = new Headers(req.headers);
-//     requestHeaders.set("x-user", JSON.stringify(user)); // Attach user info
-//     return NextResponse.next({ request: { headers: requestHeaders } });
-//   }
-
-//   // FE Protection
-//   const isProtectedPage = PROTECTED_ROUTES.some((route) =>
-//     req.nextUrl.pathname.startsWith(route)
-//   );
-
-//   if (isProtectedPage && !user) {
-//     console.log("Redirecting to Login: No valid token found");
-//     return NextResponse.redirect(new URL("/auth/login", req.url));
-//   }
-
-//   return NextResponse.next();
-// }
-
-// export const config = {
-//   matcher: ["/api/protected/:path*", "/dashboard/:path*", "/tasks/:path*"],
-// };
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import axios from "axios";
+import { cookies } from "next/headers";
 
-const PROTECTED_ROUTES = ["/dashboard", "/tasks"]; // Protected frontend routes
+const PROTECTED_ROUTES = ["/dashboard", "/tasks"]; // FE routes to protect
 
 export async function middleware(req: NextRequest) {
-  // Extract token from NextAuth.js session
-  const token = await getToken({ req, secret: process.env.JWT_SECRET });
+  const cookieStore  = await cookies();
+  // const authHeader = req.headers.get("authorization");
+  // const token = authHeader?.startsWith("Bearer ")
+  //   ? authHeader.split(" ")[1]
+  //   : cookies.get('auth_token')
+  // const feToken = req.cookies.get("auth_token")?.value; // FE auth token from the cookies
 
-  console.log("Middleware Token:", req);
+  const token = cookieStore.get("auth_token")?.value
+  const feToken = cookieStore.get("auth_token")?.value
 
-  // 🔹 1. Protect API Routes (Backend)
+  console.log("Backend Token:", token);
+  console.log("Frontend Token:", feToken);
+
+  let user = null;
+
+  // Verifying BE token
+  if (token) {
+    try {
+      const res = await axios.post(
+        `http://35.154.85.104/api/auth/verifyToken`,
+        { token }
+      );
+      if (res.status === 200) user = res.data.user;
+    } catch (error: any) {
+      console.error(
+        "Token verification failed:",
+        error.response?.data || error.message
+      );
+    }
+  }
+
+  // For /api/protected protected rouites
   if (req.nextUrl.pathname.startsWith("/api/protected")) {
-    if (!token) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-user", JSON.stringify(token.user)); // Attach user info
+    requestHeaders.set("x-user", JSON.stringify(user)); // Attaching user info to the header x-user
+    // cookieStore.set("user",user,{
+    //   httpOnly: true,  // Prevents client-side JavaScript access
+    //   sameSite: "strict", // Prevent CSRF attacks
+    //   maxAge: 60 * 60 * 24 * 7, // 7 days
+    //   path: "/", // Available across the entire site
+    // })
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // 🔹 2. Protect Frontend Routes
+  // FE Protection
   const isProtectedPage = PROTECTED_ROUTES.some((route) =>
     req.nextUrl.pathname.startsWith(route)
   );
 
-  if (isProtectedPage && !token) {
-    console.log("Redirecting to Login: No valid session found");
+  if (isProtectedPage && !feToken) {
+    console.log("Redirecting to Login: No valid frontend token");
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
   return NextResponse.next();
 }
 
-// 🔹 Apply middleware to protected routes
 export const config = {
   matcher: ["/api/protected/:path*", "/dashboard/:path*", "/tasks/:path*"],
 };
-

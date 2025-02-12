@@ -8,7 +8,6 @@ import { generateToken } from "@/lib/token";
 import { TUser } from "@/types/mongodbtypes";
 import { cookies } from "next/headers";
 
-
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
@@ -32,7 +31,7 @@ export async function POST(req: Request) {
       );
     }
     const { email, password } = parsed.data; //extracting from body
-    const user: any= await User.findOne({ email }).lean();
+    const user: any = await User.findOne({ email }).lean();
     if (!user) {
       const response: GlobalResponse = {
         success: false,
@@ -54,12 +53,18 @@ export async function POST(req: Request) {
     }
     const { password: _, __v, ...userWoPassword } = user; // removing password from response
     const token = generateToken(userWoPassword);
-    cookies().set("auth_token", token, { httpOnly: true, secure: true });
+    cookies().set("auth_token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
     const response: GlobalResponse = {
       success: true,
       message: "User Loggedin successfully",
       error: null,
-      data: { user:userWoPassword, token },
+      data: { user: userWoPassword, token },
     };
     return NextResponse.json(response, { status: 200 });
   } catch (error: any) {
