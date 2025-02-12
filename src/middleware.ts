@@ -22,8 +22,8 @@ export async function middleware(req: NextRequest) {
   if (token) {
     try {
       const res = await axios.post(
-        //`http://35.154.85.104/api/auth/verifyToken`,
-        `${req.nextUrl.origin}/api/auth/verifyToken`,
+        `http://35.154.85.104/api/auth/verifyToken`,
+        // `${req.nextUrl.origin}/api/auth/verifyToken`,
         { token }
       );
       if (res.status === 200) user = res.data.user;
