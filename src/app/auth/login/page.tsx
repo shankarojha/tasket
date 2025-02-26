@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CookieBar from "@/components/cookiebar";
-import axios from "axios";
 import axiosInstance from "@/lib/axiosInstance";
 
 export default function LoginPage() {
@@ -15,14 +14,15 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+
     try {
       setLoading(true);
       setError("");
+      setSuccess("");
 
       const res = await axiosInstance.post("/auth/login", { email, password });
-
-      setLoading(false);
 
       if (res.data.success) {
         setSuccess(res.data.message);
@@ -34,13 +34,13 @@ export default function LoginPage() {
       } else {
         throw new Error(res.data.message);
       }
-    } catch (err) {
-      setError((err as Error).message);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {
+      setLoading(false);
       setTimeout(() => {
         setError("");
       }, 2000);
-      setLoading(false);
     }
   };
 
@@ -54,13 +54,14 @@ export default function LoginPage() {
           Welcome to &#123;Tasket&#125;
         </h2>
 
-        <div className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            required
           />
           <input
             type="password"
@@ -68,19 +69,16 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            required
           />
           <button
-            onClick={handleLogin}
+            type="submit"
             className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-lg transition flex justify-center"
             disabled={loading}
           >
-            {loading ? (
-              <span className="animate-pulse">Logging in...</span>
-            ) : (
-              "Login"
-            )}
+            {loading ? <span className="animate-pulse">Logging in...</span> : "Login"}
           </button>
-        </div>
+        </form>
 
         <p className="text-secondary text-center mt-4 text-sm">
           Don't have an account?{" "}
@@ -89,6 +87,7 @@ export default function LoginPage() {
           </a>
         </p>
       </div>
+      
       {error && <CookieBar message={error} type="error" />}
       {success && <CookieBar message={success} type="success" />}
     </div>

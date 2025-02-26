@@ -76,6 +76,16 @@ export default function TasksPage() {
   const showDetails = (task: Task) => {
     setSelectedTask(task);
     setModalVisible(true);
+    setTimeout(() => {
+      form.setFieldsValue({
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        assignedTo: task.assignedTo?._id,
+        description: task.description,
+        comments: task.comments || "",
+      });
+    }, 0);
   };
 
   //submit handler
@@ -122,10 +132,11 @@ export default function TasksPage() {
         const response = await deleteTask(taskId);
         if (!response.success) throw new Error(response.message);
         setSuccess(response.message);
+        setTasks((prevTasks) => prevTasks.filter(task => task._id !== taskId));
         await fetchTasks();
         setTimeout(() => {
           handleModalClose();
-        }, 1500);
+        }, 1000);
       } catch (err) {
         setError((err as Error)?.message || "Failed to delete task");
       } finally {

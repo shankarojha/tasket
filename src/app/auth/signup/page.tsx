@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CookieBar from "@/components/cookiebar";
 
-type Role = "performer" | "manager"; // Define allowed roles
+type Role = "performer" | "manager";
 interface ValidationErrors {
   name?: string;
   email?: string;
@@ -15,13 +15,14 @@ export default function SignupPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [role, setRole] = useState<Role>("performer"); // Default role
+  const [role, setRole] = useState<Role>("performer");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<string>("");
+
   const router = useRouter();
 
-  /**Validations */
+  /** Validations */
   const isValidEmail = (email: string): boolean =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -30,26 +31,29 @@ export default function SignupPage() {
 
   const validateInputs = (): ValidationErrors => {
     const errors: ValidationErrors = {};
-    if (!name.trim()) errors.name = "Please enter name";
-    if (!isValidEmail(email)) errors.email = "Invalid Email format";
+    if (!name.trim()) errors.name = "Please enter your name.";
+    if (!isValidEmail(email)) errors.email = "Invalid email format.";
     if (!isValidPassword(password))
       errors.password =
-        "Password must be at least 8 characters, including 1 uppercase letter, 1 number, and 1 special character.";
+        "Password must be at least 8 characters long, including 1 uppercase letter, 1 number, and 1 special character.";
     return errors;
   };
-  /**Ends */
 
-  const handleSignup = async () => {
+  /** Handle Signup */
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const inputErrors: ValidationErrors = validateInputs();
       if (Object.keys(inputErrors).length > 0) {
         throw new Error(
-          inputErrors.email || inputErrors.password || inputErrors.name
+          inputErrors.name || inputErrors.email || inputErrors.password
         );
       }
+
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,14 +69,13 @@ export default function SignupPage() {
       setTimeout(() => {
         router.push("/auth/login");
       }, 2000);
-    } catch (err) {
-      console.log("err", (err as Error).message);
-      setError((err as Error).message);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Signup failed.");
     } finally {
+      setLoading(false);
       setTimeout(() => {
         setError("");
       }, 2000);
-      setLoading(false);
     }
   };
 
@@ -90,13 +93,14 @@ export default function SignupPage() {
           Register to &#123;Tasket&#125;
         </h2>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSignup} className="space-y-4">
           <input
             type="text"
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            required
           />
           <input
             type="email"
@@ -104,6 +108,7 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            required
           />
           <input
             type="password"
@@ -111,6 +116,7 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-input text-text-secondary focus:outline-none focus:ring-2 focus:ring-input-focus transition"
+            required
           />
 
           {/* Role Selection */}
@@ -139,17 +145,13 @@ export default function SignupPage() {
           </div>
 
           <button
-            onClick={handleSignup}
+            type="submit"
             className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-lg transition flex justify-center"
             disabled={loading}
           >
-            {loading ? (
-              <span className="animate-pulse">Signing up...</span>
-            ) : (
-              "Sign Up"
-            )}
+            {loading ? <span className="animate-pulse">Signing up...</span> : "Sign Up"}
           </button>
-        </div>
+        </form>
 
         <p className="text-secondary text-center mt-4 text-sm">
           Already have an account?{" "}
@@ -158,6 +160,7 @@ export default function SignupPage() {
           </a>
         </p>
       </div>
+
       {error && <CookieBar message={error} type="error" />}
       {success && <CookieBar message={success} type="success" />}
     </div>

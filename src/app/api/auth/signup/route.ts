@@ -14,6 +14,8 @@ const signupSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    await connectDB();
+
     const body = await req.json();
     const parsed = signupSchema.safeParse(body);
 
@@ -24,7 +26,16 @@ export async function POST(req: Request) {
       );
     }
     const { email, name, password, role } = parsed.data; //extracting from body
-    await connectDB();
+    const checkUser = await User.findOne({email})
+    if(checkUser){
+      const response: GlobalResponse = {
+        success: false,
+        message: "Email already exists",
+        error: "Email already exists",
+        data: null
+      }
+      return NextResponse.json(response, { status: 400 })
+    }
     const hashedPassword: string = await bcrypt.hash(password, 10); //hashing password
     const newUser = new User({ email, name, password: hashedPassword, role });
     const saveUser = await newUser.save();

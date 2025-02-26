@@ -5,7 +5,7 @@ import User from "@/models/user";
 import mongoose from "mongoose";
 import { extractUser } from "@/lib/extractUser";
 import { GlobalResponse } from "@/types/globalResponse";
-
+export const dynamic = 'force-dynamic';
 export async function GET(
   req: Request) {
   try {

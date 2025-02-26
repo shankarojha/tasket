@@ -76,6 +76,16 @@ export default function TasksPage() {
   const showDetails = (task: Task) => {
     setSelectedTask(task);
     setModalVisible(true);
+    setTimeout(() => {
+      form.setFieldsValue({
+        title: task.title,
+        status: task.status,
+        priority: task.priority,
+        assignedTo: task.assignedTo?._id,
+        description: task.description,
+        comments: task.comments || "",
+      });
+    }, 0);
   };
 
   //submit handler

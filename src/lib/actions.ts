@@ -1,4 +1,6 @@
 import axiosInstance from "./axiosInstance";
+import { revalidatePath } from "next/cache";
+import { refreshPerformers, refreshTasks } from "./revalidate";
 
 export const getTasksByUser = async (id: string) => {
   const response = await axiosInstance.get(
@@ -15,7 +17,10 @@ export const getTasksForUser = async (id: string) => {
 };
 
 export const getUsersToAssign = async () => {
-  const response = await axiosInstance.get(`protected/users/getPerformers`);
+  await refreshPerformers();
+  await refreshTasks();
+  const response = await axiosInstance.get(`protected/users/getPerformers`,{
+    headers: { "Cache-Control": "no-cache" },});
   return response.data;
 };
 

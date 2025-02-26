@@ -19,7 +19,7 @@ export default function CookieBar({ message, type }: CookieBarProps) {
 
   return (
     <div
-      className={`fixed bottom-5 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white text-sm shadow-lg transition-all duration-300 ${
+      className={`z-50 fixed bottom-5 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white text-sm shadow-lg transition-all duration-300 ${
         type === "success" ? "bg-green-500" : "bg-red-500"
       }`}
     >
