@@ -1,0 +1,10 @@
+.portfolioImage{
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff; /* Optional border */
+    width: 200px;
+    height: 200px;
+    display: flex;
+  align-items: center;
+  justify-content: center;
+}
